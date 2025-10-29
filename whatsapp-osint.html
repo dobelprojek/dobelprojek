@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp OSINT Tool - Pencarian Nomor WhatsApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .whatsapp-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #25D366;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #20ba5a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: #333;
+            font-size: 16px;
+            word-break: break-all;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="whatsapp-icon">📱</div>
+            <h1>WhatsApp OSINT Tool</h1>
+            <p>Tool pencarian dan validasi nomor WhatsApp</p>
+        </div>
+
+        <form id="osintForm">
+            <div class="input-group">
+                <label for="countryCode">Kode Negara</label>
+                <select id="countryCode" required>
+                    <option value="62">🇮🇩 Indonesia (+62)</option>
+                    <option value="60">🇲🇾 Malaysia (+60)</option>
+                    <option value="65">🇸🇬 Singapore (+65)</option>
+                    <option value="1">🇺🇸 USA (+1)</option>
+                    <option value="44">🇬🇧 UK (+44)</option>
+                    <option value="91">🇮🇳 India (+91)</option>
+                    <option value="86">🇨🇳 China (+86)</option>
+                    <option value="81">🇯🇵 Japan (+81)</option>
+                    <option value="82">🇰🇷 Korea (+82)</option>
+                    <option value="66">🇹🇭 Thailand (+66)</option>
+                    <option value="84">🇻🇳 Vietnam (+84)</option>
+                    <option value="63">🇵🇭 Philippines (+63)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="phoneNumber">Nomor Telepon</label>
+                <input 
+                    type="tel" 
+                    id="phoneNumber" 
+                    placeholder="Contoh: 812345678 atau 08123456789" 
+                    required
+                    pattern="[0-9]+"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary">🔍 Analisis Nomor</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Menganalisis nomor...</p>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <h3 style="margin-bottom: 20px; color: #333;">📊 Hasil Analisis</h3>
+            
+            <div class="result-item">
+                <div class="result-label">Nomor Lengkap (Format Internasional)</div>
+                <div class="result-value" id="fullNumber"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Format WhatsApp</div>
+                <div class="result-value" id="waFormat"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Kode Negara</div>
+                <div class="result-value" id="countryInfo"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Link WhatsApp</div>
+                <div class="result-value" id="waLink"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-success" id="openWhatsApp">💬 Buka WhatsApp</button>
+                <button class="btn btn-secondary" id="copyNumber">📋 Salin Nomor</button>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ Informasi Penting:</strong>
+            Tool ini membantu memformat dan memvalidasi nomor WhatsApp. Untuk nomor Indonesia, masukkan tanpa 0 di depan (contoh: 812345678) atau dengan 0 (contoh: 0812345678).
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('osintForm');
+        const loading = document.getElementById('loading');
+        const resultBox = document.getElementById('resultBox');
+        const countryCodeSelect = document.getElementById('countryCode');
+        const phoneNumberInput = document.getElementById('phoneNumber');
+
+        const countryNames = {
+            '62': 'Indonesia',
+            '60': 'Malaysia',
+            '65': 'Singapore',
+            '1': 'United States',
+            '44': 'United Kingdom',
+            '91': 'India',
+            '86': 'China',
+            '81': 'Japan',
+            '82': 'South Korea',
+            '66': 'Thailand',
+            '84': 'Vietnam',
+            '63': 'Philippines'
+        };
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            analyzeNumber();
+        });
+
+        function analyzeNumber() {
+            loading.classList.add('show');
+            resultBox.classList.remove('show');
+
+            setTimeout(() => {
+                const countryCode = countryCodeSelect.value;
+                let phoneNumber = phoneNumberInput.value.trim();
+
+                phoneNumber = phoneNumber.replace(/\D/g, '');
+
+                if (phoneNumber.startsWith('0')) {
+                    phoneNumber = phoneNumber.substring(1);
+                }
+
+                if (phoneNumber.startsWith(countryCode)) {
+                    phoneNumber = phoneNumber.substring(countryCode.length);
+                }
+
+                const fullNumber = `+${countryCode}${phoneNumber}`;
+                const waFormat = `${countryCode}${phoneNumber}`;
+                const waLink = `https://wa.me/${waFormat}`;
+                const countryName = countryNames[countryCode] || 'Unknown';
+
+                document.getElementById('fullNumber').textContent = fullNumber;
+                document.getElementById('waFormat').textContent = waFormat;
+                document.getElementById('countryInfo').textContent = `${countryName} (+${countryCode})`;
+                document.getElementById('waLink').innerHTML = `<a href="${waLink}" target="_blank" style="color: #667eea; text-decoration: none;">${waLink}</a>`;
+
+                document.getElementById('openWhatsApp').onclick = function() {
+                    window.open(waLink, '_blank');
+                };
+
+                document.getElementById('copyNumber').onclick = function() {
+                    navigator.clipboard.writeText(fullNumber).then(() => {
+                        const btn = document.getElementById('copyNumber');
+                        const originalText = btn.textContent;
+                        btn.textContent = '✅ Tersalin!';
+                        btn.style.background = '#25D366';
+                        btn.style.color = 'white';
+                        
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.background = '#f5f5f5';
+                            btn.style.color = '#333';
+                        }, 2000);
+                    });
+                };
+
+                loading.classList.remove('show');
+                resultBox.classList.add('show');
+            }, 1000);
+        }
+
+        phoneNumberInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+</body>
+</html>
