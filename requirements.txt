@@ -1,0 +1,5 @@
+# WhatsApp Number Tracker - Requirements
+# Tool ini hanya menggunakan library standar Python
+# Tidak ada dependency eksternal yang diperlukan
+
+# Python 3.6+ required
